@@ -64,7 +64,7 @@ jobs:
       - name: Get SHA
         id: sha
         run: |
-          echo "sha=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+          "sha=$(git rev-parse HEAD)" | Out-File $GITHUB_OUTPUT
           echo ${{ steps.sha.outputs.sha }}
 
   create_nuget:
