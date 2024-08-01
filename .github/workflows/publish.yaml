@@ -14,10 +14,6 @@ env:
   DOTNET_NOLOGO: true
   NuGetDirectory: ${{ github.workspace }}/nuget
 
-defaults:
-  run:
-    shell: pwsh
-
 jobs:
   set_version:
     if: startsWith(github.ref, 'refs/tags/')
@@ -64,7 +60,7 @@ jobs:
       - name: Get SHA
         id: sha
         run: |
-          "sha=$(git rev-parse HEAD)" | Out-File $GITHUB_OUTPUT
+          echo "sha=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
           echo ${{ steps.sha.outputs.sha }}
 
   create_nuget:
