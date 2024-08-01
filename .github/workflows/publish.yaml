@@ -33,7 +33,7 @@ jobs:
         id: package_version
         uses: KageKirin/set-csproj-version@v0
         with:
-          file: ./ModShardPacker.csproj
+          file: ./ModShardPackerReference.csproj
           version: ${{ github.ref_name  }}
 
       - name: Set user info
