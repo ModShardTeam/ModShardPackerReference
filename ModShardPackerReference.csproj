@@ -9,6 +9,9 @@
     <PackageOutputPath>./nupkg</PackageOutputPath>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Authors>zizani</Authors>
+    <PackageTags>msl</PackageTags>
+    <PackageProjectUrl>https://github.com/ModShardTeam/ModShardPackerReference</PackageProjectUrl>
   </PropertyGroup>
 
   <ItemGroup>
