@@ -26,12 +26,6 @@
     <PackageReference Include="Serilog.Sinks.File" Version="5.0.0"/>
   </ItemGroup>
 
-  <ItemGroup>
-    <Reference Include="UndertaleModLib">
-      <HintPath>lib\UndertaleModLib.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-
   <PropertyGroup>
     <RepositoryUrl>https://github.com/ModShardTeam/ModShardPackerReference</RepositoryUrl>
   </PropertyGroup>

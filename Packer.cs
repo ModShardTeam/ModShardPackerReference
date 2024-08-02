@@ -13,7 +13,18 @@ using Microsoft.CodeAnalysis.Emit;
 namespace ModShardPackerReference;
 public static class FilePacker
 {
-    public static bool Pack(string? namePacked, string folderToPack, string outputfolder, string dllfolder, string frontVersion, Type ModShardLauncherModType)
+    /// <summary>
+    /// Pack function
+    /// </summary>
+    /// <param name="namePacked"></param>
+    /// <param name="folderToPack"></param>
+    /// <param name="outputfolder"></param>
+    /// <param name="dllfolder"></param>
+    /// <param name="frontVersion"></param>
+    /// <param name="neededType"></param>
+    /// <returns></returns>
+    /// <exception cref="DirectoryNotFoundException"></exception>
+    public static bool Pack(string? namePacked, string folderToPack, string outputfolder, string dllfolder, string frontVersion, Type[] neededType)
     {
         Log.Information("Starting packing {0}", folderToPack);
 
@@ -108,7 +119,18 @@ public static class FilePacker
         Log.Information("Writting assemblies...");
 
         Log.Information("Starting compilation...");
-        bool successful = CompileMod(namePacked, folderToPack, dllfolder, ModShardLauncherModType, out byte[] code, out _);
+
+        bool successful;
+        byte[] code;
+        try
+        {
+            successful = CompileMod(namePacked, folderToPack, dllfolder, neededType, out code, out _);
+        }
+        catch
+        {
+            throw;
+        }
+
         if (!successful)
         {
             fs.Close();
@@ -173,7 +195,7 @@ public static class FilePacker
         IEnumerable<string> filteredPath = trustedList.Where(p => required.Exists(r => p.Contains(r)));
         return filteredPath.Select(x => MetadataReference.CreateFromFile(x) as MetadataReference).ToList();
     }
-    public static Diagnostic[] RoslynCompile(string name, IEnumerable<string> files, IEnumerable<string> preprocessorSymbols, string dllfolder, Type ModShardLauncherModType, out byte[] code, out byte[] pdb)
+    public static Diagnostic[] RoslynCompile(string name, IEnumerable<string> files, IEnumerable<string> preprocessorSymbols, string dllfolder, Type[] neededType, out byte[] code, out byte[] pdb)
     {
         NameSyntax[] qualifiedNames = {
             SyntaxFactory.ParseName("System"),
@@ -200,14 +222,16 @@ public static class FilePacker
         IEnumerable<MetadataReference> defaultReferences = Directory.GetFiles(dllfolder, "*.dll")
             .Select(x => MetadataReference.CreateFromFile(x));
         
-        // add more references
-        Type[] neededType = { 
-            typeof(UndertaleModLib.Models.UndertaleCode),
-            ModShardLauncherModType
-        };
-        defaultReferences = defaultReferences
-            .Concat(neededType.Select(x => MetadataReference.CreateFromFile(x.Assembly.Location)))
-            .Concat(GetSystemMetadataReferences());
+        try
+        {
+            defaultReferences = defaultReferences
+                .Concat(neededType.Select(x => MetadataReference.CreateFromFile(x.Assembly.Location)))
+                .Concat(GetSystemMetadataReferences());
+        }
+        catch
+        {
+            throw;
+        }
 
         IEnumerable<SyntaxTree> src = files.Select(f => SyntaxFactory.ParseSyntaxTree(File.ReadAllText(f), parseOptions, f, Encoding.UTF8));
         // update tree before compilation to add needed using
@@ -262,14 +286,23 @@ public static class FilePacker
 
         return results.Diagnostics.ToArray();
     }
-    public static bool CompileMod(string name, string path, string dllfolder, Type ModShardLauncherModType, out byte[] code, out byte[] pdb)
+    public static bool CompileMod(string name, string path, string dllfolder, Type[] neededType, out byte[] code, out byte[] pdb)
     {
         IEnumerable<string> files = Directory
             .GetFiles(path, "*.cs", SearchOption.AllDirectories)
             .Where(file => !IgnoreCompletely(path, file));
         
         Log.Information("Compilation: Gathering files...");
-        Diagnostic[] result = RoslynCompile(name, files, new[] { "FNA" }, dllfolder, ModShardLauncherModType, out code, out pdb);
+
+        Diagnostic[] result = Array.Empty<Diagnostic>();
+        try
+        {
+            result = RoslynCompile(name, files, new[] { "FNA" }, dllfolder, neededType, out code, out pdb);
+        }
+        catch
+        {
+            throw;
+        }
 
         Log.Information("Compilation: Gathering results...");
         
