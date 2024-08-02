@@ -14,7 +14,7 @@ namespace ModShardPackerReference;
 public static class FilePacker
 {
     /// <summary>
-    /// Pack function
+    /// Pack the content folder into a sml file named <see cref="namePacked"/>.
     /// </summary>
     /// <param name="namePacked"></param>
     /// <param name="folderToPack"></param>
@@ -228,8 +228,20 @@ public static class FilePacker
                 .Concat(neededType.Select(x => MetadataReference.CreateFromFile(x.Assembly.Location)))
                 .Concat(GetSystemMetadataReferences());
         }
-        catch
+        catch(Exception ex)
         {
+            if (ex is ArgumentNullException || ex is ArgumentException)
+            {
+                Log.Error(ex, "Something went wrong");
+            }
+            else if (ex is IOException)
+            {
+                Log.Error(ex, "Error with the dlls, check if they are correctly referenced.");
+            }
+            else
+            {
+                Log.Error(ex, "Unexpected error");
+            }
             throw;
         }
 
